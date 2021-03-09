@@ -803,6 +803,21 @@ typedef ze_result_t (ZE_APICALL *ze_pfnFenceHostSynchronize_t)(
     );
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for zeFenceDeviceSignal
+typedef ze_result_t (ZE_APICALL *ze_pfnFenceDeviceSignal_t)(
+    ze_fence_handle_t,
+    uint64_t
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for zeFenceDeviceSynchronize
+typedef ze_result_t (ZE_APICALL *ze_pfnFenceDeviceSynchronize_t)(
+    ze_command_queue_handle_t,
+    ze_fence_handle_t,
+    uint64_t
+    );
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Function-pointer for zeFenceQueryStatus 
 typedef ze_result_t (ZE_APICALL *ze_pfnFenceQueryStatus_t)(
     ze_fence_handle_t
@@ -821,6 +836,8 @@ typedef struct _ze_fence_dditable_t
     ze_pfnFenceCreate_t                                         pfnCreate;
     ze_pfnFenceDestroy_t                                        pfnDestroy;
     ze_pfnFenceHostSynchronize_t                                pfnHostSynchronize;
+    ze_pfnFenceDeviceSignal_t                                   pfnDeviceSignal;
+    ze_pfnFenceDeviceSynchronize_t                              pfnDeviceSynchronize;
     ze_pfnFenceQueryStatus_t                                    pfnQueryStatus;
     ze_pfnFenceReset_t                                          pfnReset;
 } ze_fence_dditable_t;

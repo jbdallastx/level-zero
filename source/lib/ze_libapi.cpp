@@ -2708,6 +2708,33 @@ zeFenceHostSynchronize(
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+ze_result_t ZE_APICALL
+zeFenceDeviceSignal(
+    ze_fence_handle_t hFence,
+    uint64_t value)
+{
+    auto pfnDeviceSignal = ze_lib::context->zeDdiTable.Fence.pfnDeviceSignal;
+    if( nullptr == pfnDeviceSignal )
+        return ZE_RESULT_ERROR_UNSUPPORTED_VERSION;
+
+    return pfnDeviceSignal( hFence, value );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+ZE_APIEXPORT ze_result_t ZE_APICALL
+zeFenceDeviceSynchronize(
+    ze_command_queue_handle_t hCommandQueue,
+    ze_fence_handle_t hFence,
+    uint64_t value)
+{
+    auto pfnDeviceSynchronize = ze_lib::context->zeDdiTable.Fence.pfnDeviceSynchronize;
+    if( nullptr == pfnDeviceSynchronize )
+        return ZE_RESULT_ERROR_UNSUPPORTED_VERSION;
+
+    return pfnDeviceSynchronize( hCommandQueue, hFence, value );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Queries a fence object's status.
 /// 
 /// @details

@@ -3532,6 +3532,19 @@ zeFenceHostSynchronize(
     );
 
 ///////////////////////////////////////////////////////////////////////////////
+ZE_APIEXPORT ze_result_t ZE_APICALL
+zeFenceDeviceSignal(
+    ze_fence_handle_t hFence,
+    uint64_t value);
+
+///////////////////////////////////////////////////////////////////////////////
+ZE_APIEXPORT ze_result_t ZE_APICALL
+zeFenceDeviceSynchronize(
+    ze_command_queue_handle_t hCommandQueue,
+    ze_fence_handle_t hFence,
+    uint64_t value);
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Queries a fence object's status.
 /// 
 /// @details
