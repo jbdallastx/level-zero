@@ -112,8 +112,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/source/wrapper/include)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
-set(TARGET_LOADER_NAME ze_loader)
-
+set(TARGET_LOADER_NAME ze_loader_vpu64)
 
 add_subdirectory(source)
 add_subdirectory(samples)
