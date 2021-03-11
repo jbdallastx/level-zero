@@ -1769,6 +1769,13 @@ zeGetGraphProcAddrTable(
     );
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for zeGetGraphProcAddrTable
+typedef ze_result_t (ZE_APICALL *ze_pfnGetGraphProcAddrTable_t)(
+    ze_api_version_t,
+    ze_graph_dditable_t*
+    );
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Container for all DDI tables
 typedef struct _ze_dditable_t
 {

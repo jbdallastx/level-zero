@@ -5520,6 +5520,51 @@ zeGetVirtualMemProcAddrTable(
     return result;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Exported function for filling application's Graph table
+///        with current process' addresses
+///
+/// @returns
+///     - ::ZE_RESULT_SUCCESS
+///     - ::ZE_RESULT_ERROR_UNINITIALIZED
+///     - ::ZE_RESULT_ERROR_INVALID_NULL_POINTER
+///     - ::ZE_RESULT_ERROR_UNSUPPORTED_VERSION
+ZE_DLLEXPORT ze_result_t ZE_APICALL
+zeGetGraphProcAddrTable(
+    ze_api_version_t version,                       ///< [in] API version requested
+    ze_graph_dditable_t* pDdiTable            ///< [in,out] pointer to table of DDI function pointers
+)
+{
+    if( loader::context->drivers.size() < 1 )
+        return ZE_RESULT_ERROR_UNINITIALIZED;
+
+    if( nullptr == pDdiTable )
+        return ZE_RESULT_ERROR_INVALID_NULL_POINTER;
+
+    if( loader::context->version < version )
+        return ZE_RESULT_ERROR_UNSUPPORTED_VERSION;
+
+    ze_result_t result = ZE_RESULT_SUCCESS;
+
+    // Load the device-driver DDI tables
+    for( auto& drv : loader::context->drivers )
+    {
+        if( ZE_RESULT_SUCCESS == result )
+        {
+            auto getTable = reinterpret_cast<ze_pfnGetGraphProcAddrTable_t>(
+                GET_FUNCTION_PTR( drv.handle, "zeGetGraphProcAddrTable") );
+            result = getTable( version, &drv.dditable.ze.Graph );
+        }
+    }
+
+    if( ZE_RESULT_SUCCESS == result )
+    {
+        // return pointers directly to driver's DDIs
+        *pDdiTable = loader::context->drivers.front().dditable.ze.Graph;
+    }
+
+    return result;
+}
 
 #if defined(__cplusplus)
 };
