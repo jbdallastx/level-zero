@@ -17,10 +17,11 @@
 
 namespace loader {
 
-std::vector<DriverLibraryPath> discoverDriversBasedOnDisplayAdapters();
+void discoverDriversBasedOnDisplayAdapters(const GUID rguid, std::vector<DriverLibraryPath>& enabledDrivers);
 
-std::vector<DriverLibraryPath> discoverEnabledDrivers() {
-    return discoverDriversBasedOnDisplayAdapters();
+void discoverEnabledDrivers(std::vector<DriverLibraryPath>& enabledDrivers) {
+    discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_DISPLAY, enabledDrivers);
+    discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_COMPUTEACCELERATOR, enabledDrivers);
 }
 
 bool isDeviceAvailable(DEVINST devnode) {
@@ -79,10 +80,10 @@ DriverLibraryPath readDriverPathForDisplayAdapter(DEVINST dnDevNode) {
     return driverPath;
 }
 
-std::wstring readDisplayAdaptersDeviceIdsList() {
+std::wstring readDisplayAdaptersDeviceIdsList(const GUID rguid) {
     OLECHAR displayGuidStr[MAX_GUID_STRING_LEN];
 
-    int strFromGuidErr = StringFromGUID2(GUID_DEVCLASS_COMPUTEACCELERATOR, displayGuidStr,
+    int strFromGuidErr = StringFromGUID2(rguid, displayGuidStr,
                                         MAX_GUID_STRING_LEN);
     if (MAX_GUID_STRING_LEN != strFromGuidErr) {
         assert(false && "StringFromGUID2 failed");
@@ -112,11 +113,10 @@ std::wstring readDisplayAdaptersDeviceIdsList() {
     return deviceIdList;
 }
 
-std::vector<DriverLibraryPath> discoverDriversBasedOnDisplayAdapters() {
-    std::vector<DriverLibraryPath> enabledDrivers;
-    auto deviceIdList = readDisplayAdaptersDeviceIdsList();
+void discoverDriversBasedOnDisplayAdapters(const GUID rguid, std::vector<DriverLibraryPath>& enabledDrivers) {
+    auto deviceIdList = readDisplayAdaptersDeviceIdsList(rguid);
     if (deviceIdList.empty()) {
-        return enabledDrivers;
+        return;
     }
 
     auto isNotDeviceListEnd = [](wchar_t *it) { return '\0' != it[0]; };
@@ -147,7 +147,6 @@ std::vector<DriverLibraryPath> discoverDriversBasedOnDisplayAdapters() {
 
         enabledDrivers.push_back(std::move(driverPath));
     }
-    return enabledDrivers;
 }
 
 } // namespace loader

@@ -93,7 +93,8 @@ namespace loader
         }
         else
         {
-            auto discoveredDrivers = discoverEnabledDrivers();
+            std::vector<DriverLibraryPath> discoveredDrivers;
+            discoverEnabledDrivers(discoveredDrivers);
 
             drivers.reserve( discoveredDrivers.size() + getenv_tobool( "ZE_ENABLE_NULL_DRIVER" ) );
             if( getenv_tobool( "ZE_ENABLE_NULL_DRIVER" ) )
