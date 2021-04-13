@@ -147,13 +147,6 @@ namespace ze_lib
             result = getTable( ZE_API_VERSION_1_1, &zeDdiTable.VirtualMem );
         }
 
-        if( ZE_RESULT_SUCCESS == result )
-        {
-            auto getTable = reinterpret_cast<ze_pfnGetGraphProcAddrTable_t>(
-                GET_FUNCTION_PTR(loader, "zeGetGraphProcAddrTable") );
-            result = getTable( ZE_API_VERSION_1_1, &zeDdiTable.Graph );
-        }
-
         return result;
     }
 #else
@@ -249,11 +242,6 @@ namespace ze_lib
         if( ZE_RESULT_SUCCESS == result )
         {
             result = zeGetVirtualMemProcAddrTable( ZE_API_VERSION_1_1, &zeDdiTable.VirtualMem );
-        }
-
-        if( ZE_RESULT_SUCCESS == result )
-        {
-            result = zeGetGraphProcAddrTable( ZE_API_VERSION_1_1, &zeDdiTable.Graph );
         }
 
         return result;
