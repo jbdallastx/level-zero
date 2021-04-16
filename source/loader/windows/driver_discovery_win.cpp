@@ -20,9 +20,16 @@
 
 namespace loader {
 
-void discoverDriversBasedOnDisplayAdapters(const GUID rguid, std::vector<DriverLibraryPath>& enabledDrivers);
+// Temporarily define Compute Accelerator GUID until SDK upgraded to 19041
+#ifndef GUID_DEVCLASS_COMPUTEACCELERATOR
+    DEFINE_GUID( GUID_DEVCLASS_COMPUTEACCELERATOR,  0xf01a9d53L, 0x3ff6, 0x48d2, 0x9f, 0x97, 0xc8, 0xa7, 0x00, 0x4b, 0xe1, 0x0c );
+#endif
 
-void discoverEnabledDrivers(std::vector<DriverLibraryPath>& enabledDrivers) {
+std::vector<DriverLibraryPath> discoverDriversBasedOnDisplayAdapters(const GUID rguid);
+
+std::vector<DriverLibraryPath> discoverEnabledDrivers() {
+
+    std::vector<DriverLibraryPath> enabledDrivers;
 
     DWORD envBufferSize = 65535;
     std::string altDrivers;
@@ -31,8 +38,12 @@ void discoverEnabledDrivers(std::vector<DriverLibraryPath>& enabledDrivers) {
     // ZE_ENABLE_ALT_DRIVERS is for development/debug only
     envBufferSize = GetEnvironmentVariable("ZE_ENABLE_ALT_DRIVERS", &altDrivers[0], envBufferSize);
     if (!envBufferSize) {
-        discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_DISPLAY, enabledDrivers);
-        discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_COMPUTEACCELERATOR, enabledDrivers);
+#if 0
+        auto displayDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_DISPLAY);
+        enabledDrivers.insert(enabledDrivers.end(), displayDrivers.begin(), displayDrivers.end());
+#endif
+        auto computeDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_COMPUTEACCELERATOR);  
+        enabledDrivers.insert(enabledDrivers.end(), computeDrivers.begin(), computeDrivers.end());
     } else {
         std::stringstream ss(altDrivers.c_str());
         while (ss.good()) {
@@ -41,6 +52,8 @@ void discoverEnabledDrivers(std::vector<DriverLibraryPath>& enabledDrivers) {
             enabledDrivers.emplace_back(substr);
         }
     }
+
+    return enabledDrivers;
 }
 
 bool isDeviceAvailable(DEVINST devnode) {
@@ -132,10 +145,11 @@ std::wstring readDisplayAdaptersDeviceIdsList(const GUID rguid) {
     return deviceIdList;
 }
 
-void discoverDriversBasedOnDisplayAdapters(const GUID rguid, std::vector<DriverLibraryPath>& enabledDrivers) {
+std::vector<DriverLibraryPath> discoverDriversBasedOnDisplayAdapters(const GUID rguid) {
+    std::vector<DriverLibraryPath> enabledDrivers;
     auto deviceIdList = readDisplayAdaptersDeviceIdsList(rguid);
     if (deviceIdList.empty()) {
-        return;
+        return enabledDrivers;
     }
 
     auto isNotDeviceListEnd = [](wchar_t *it) { return '\0' != it[0]; };
@@ -166,6 +180,7 @@ void discoverDriversBasedOnDisplayAdapters(const GUID rguid, std::vector<DriverL
 
         enabledDrivers.push_back(std::move(driverPath));
     }
+    return enabledDrivers;
 }
 
 } // namespace loader

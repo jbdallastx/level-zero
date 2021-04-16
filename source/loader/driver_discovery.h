@@ -15,6 +15,6 @@ namespace loader {
 
 using DriverLibraryPath = std::string;
 
-void discoverEnabledDrivers(std::vector<DriverLibraryPath>&);
+std::vector<DriverLibraryPath> discoverEnabledDrivers();
 
 } // namespace loader
