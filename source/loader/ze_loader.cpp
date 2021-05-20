@@ -15,60 +15,30 @@ namespace loader
     context_t *context;
 
     ///////////////////////////////////////////////////////////////////////////////
-    HMODULE LoadDriverFromCurrentPath( void )
-    {
-        HMODULE driver = nullptr;
-
-#if !defined _RELEASE
-
-        char path[ _MAX_PATH ];
-        DWORD size = _MAX_PATH;
-
-        GetCurrentDirectory( _MAX_PATH, path );
-        strcat( path, "\\ze_intel_vpu64.dll" );
-
-        driver = LOAD_DRIVER_LIBRARY( path );
-
-#endif  // !_RELEASE
-
-        return driver;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
     ze_result_t context_t::init()
     {
-        driver_t driver;
-        driver.handle = LoadDriverFromCurrentPath();
+        auto discoveredDrivers = discoverEnabledDrivers();
 
-        if( driver.handle )
+        drivers.reserve( discoveredDrivers.size() + getenv_tobool( "ZE_ENABLE_NULL_DRIVER" ) );
+        if( getenv_tobool( "ZE_ENABLE_NULL_DRIVER" ) )
         {
-            drivers.push_back( driver );
+            auto handle = LOAD_DRIVER_LIBRARY( MAKE_LIBRARY_NAME( "ze_null", L0_LOADER_VERSION ) );
+            if( NULL != handle )
+            {
+                drivers.emplace_back();
+                drivers.rbegin()->handle = handle;
+            }
         }
-        else
+
+        for( auto name : discoveredDrivers )
         {
-            auto discoveredDrivers = discoverEnabledDrivers();
-
-            drivers.reserve( discoveredDrivers.size() + getenv_tobool( "ZE_ENABLE_NULL_DRIVER" ) );
-            if( getenv_tobool( "ZE_ENABLE_NULL_DRIVER" ) )
+            auto handle = LOAD_DRIVER_LIBRARY( name.c_str() );
+            if( NULL != handle )
             {
-                auto handle = LOAD_DRIVER_LIBRARY( MAKE_LIBRARY_NAME( "ze_null", L0_LOADER_VERSION ) );
-                if( NULL != handle )
-                {
-                    drivers.emplace_back();
-                    drivers.rbegin()->handle = handle;
-                }
+                drivers.emplace_back();
+                drivers.rbegin()->handle = handle;
             }
 
-            for( auto name : discoveredDrivers )
-            {
-                auto handle = LOAD_DRIVER_LIBRARY( name.c_str() );
-                if( NULL != handle )
-                {
-                    drivers.emplace_back();
-                    drivers.rbegin()->handle = handle;
-                }
-
-            }
         }
 
         if( getenv_tobool( "ZE_ENABLE_VALIDATION_LAYER" ) )
