@@ -20,11 +20,6 @@
 
 namespace loader {
 
-// Temporarily define Compute Accelerator GUID until SDK upgraded to 19041
-#ifndef GUID_DEVCLASS_COMPUTEACCELERATOR
-    DEFINE_GUID( GUID_DEVCLASS_COMPUTEACCELERATOR,  0xf01a9d53L, 0x3ff6, 0x48d2, 0x9f, 0x97, 0xc8, 0xa7, 0x00, 0x4b, 0xe1, 0x0c );
-#endif
-
 std::vector<DriverLibraryPath> discoverDriversBasedOnDisplayAdapters(const GUID rguid);
 
 std::vector<DriverLibraryPath> discoverEnabledDrivers() {
@@ -38,11 +33,9 @@ std::vector<DriverLibraryPath> discoverEnabledDrivers() {
     // ZE_ENABLE_ALT_DRIVERS is for development/debug only
     envBufferSize = GetEnvironmentVariable("ZE_ENABLE_ALT_DRIVERS", &altDrivers[0], envBufferSize);
     if (!envBufferSize) {
-#if 0
         auto displayDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_DISPLAY);
+        auto computeDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_COMPUTEACCELERATOR);
         enabledDrivers.insert(enabledDrivers.end(), displayDrivers.begin(), displayDrivers.end());
-#endif
-        auto computeDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_COMPUTEACCELERATOR);  
         enabledDrivers.insert(enabledDrivers.end(), computeDrivers.begin(), computeDrivers.end());
     } else {
         std::stringstream ss(altDrivers.c_str());

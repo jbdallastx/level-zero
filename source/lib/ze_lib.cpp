@@ -44,8 +44,18 @@ namespace ze_lib
         auto loaderInit = reinterpret_cast<loaderInit_t>(
                 GET_FUNCTION_PTR(loader, "zeLoaderInit") );
         result = loaderInit();
+        if( ZE_RESULT_SUCCESS == result ) {
+            typedef HMODULE (ZE_APICALL *getTracing_t)();
+            auto getTracing = reinterpret_cast<getTracing_t>(
+                GET_FUNCTION_PTR(loader, "zeLoaderGetTracingHandle") );
+            tracing_lib = getTracing();
+        }
 #else
         result = zeLoaderInit();
+        if( ZE_RESULT_SUCCESS == result ) {
+            tracing_lib = zeLoaderGetTracingHandle();
+        }
+        
 #endif
 
 
@@ -73,3 +83,25 @@ namespace ze_lib
     }
 
 } // namespace ze_lib
+
+extern "C" {
+
+
+ze_result_t ZE_APICALL
+zelLoaderGetVersions(
+   size_t *num_elems,                     //Pointer to num versions to get.  
+   zel_component_version_t *versions)     //Pointer to array of versions. If set to NULL, num_elems is returned
+{
+#ifdef DYNAMIC_LOAD_LOADER
+    if(nullptr == ze_lib::context->loader)
+        return ZE_RESULT_ERROR;
+    typedef ze_result_t (ZE_APICALL *zelLoaderGetVersions_t)(size_t *num_elems, zel_component_version_t *versions);
+    auto getVersions = reinterpret_cast<zelLoaderGetVersions_t>(
+            GET_FUNCTION_PTR(ze_lib::context->loader, "zelLoaderGetVersionsInternal") );
+    return getVersions(num_elems, versions);
+#else
+    return zelLoaderGetVersionsInternal(num_elems, versions);
+#endif
+}
+
+} //extern "c"
