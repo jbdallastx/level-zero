@@ -33,9 +33,9 @@ std::vector<DriverLibraryPath> discoverEnabledDrivers() {
     // ZE_ENABLE_ALT_DRIVERS is for development/debug only
     envBufferSize = GetEnvironmentVariable("ZE_ENABLE_ALT_DRIVERS", &altDrivers[0], envBufferSize);
     if (!envBufferSize) {
-        auto displayDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_DISPLAY);
+        //auto displayDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_DISPLAY);
         auto computeDrivers = discoverDriversBasedOnDisplayAdapters(GUID_DEVCLASS_COMPUTEACCELERATOR);
-        enabledDrivers.insert(enabledDrivers.end(), displayDrivers.begin(), displayDrivers.end());
+        //enabledDrivers.insert(enabledDrivers.end(), displayDrivers.begin(), displayDrivers.end());
         enabledDrivers.insert(enabledDrivers.end(), computeDrivers.begin(), computeDrivers.end());
     } else {
         std::stringstream ss(altDrivers.c_str());
